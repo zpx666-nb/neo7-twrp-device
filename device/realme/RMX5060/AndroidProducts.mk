@@ -3,4 +3,3 @@ PRODUCT_MAKEFILES := \
 
 COMMON_LUNCH_CHOICES := \
     omni_RMX5060-eng
-
