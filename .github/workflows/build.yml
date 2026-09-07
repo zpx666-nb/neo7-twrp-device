@@ -1,0 +1,49 @@
+name: Build TWRP vendor_boot RMX5060
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout device repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y repo wget curl
+
+      - name: Download prebuilt binaries from Release
+        env:
+          REPO: ${{ github.repository }}
+          TAG: v1.0
+        run: |
+          mkdir -p ./RNA_neo7rec/prebuilt
+          wget https://github.com/${REPO}/releases/download/${TAG}/boot.img -O ./RNA_neo7rec/prebuilt/boot.img
+          wget https://github.com/${REPO}/releases/download/${TAG}/vendor_boot.img -O ./RNA_neo7rec/prebuilt/vendor_boot.img
+          wget https://github.com/${REPO}/releases/download/${TAG}/dtbo.img -O ./RNA_neo7rec/prebuilt/dtbo.img
+          wget https://github.com/${REPO}/releases/download/${TAG}/dtb -O ./RNA_neo7rec/prebuilt/dtb
+
+      - name: Sync TWRP‑12.1 source
+        run: |
+          mkdir twrp && cd twrp
+          repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-12.1
+          repo sync -j4
+          mkdir -p device/realme
+          cp -r ../RNA_neo7rec device/realme/RMX5060
+
+      - name: Compile TWRP vendor_bootimage
+        run: |
+          cd twrp
+          export ALLOW_MISSING_DEPENDENCIES=true
+          source build/envsetup.sh
+          lunch omni_RMX5060‑eng
+          mka vendor_bootimage
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: twrp-vendor_boot-RMX5060
+          path: twrp/out/target/product/RMX5060/vendor_boot.img
+
