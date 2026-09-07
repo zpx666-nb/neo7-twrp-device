@@ -1,0 +1,6 @@
+/boot		ext4	/dev/block/by-name/boot
+/vendor_boot	ext4	/dev/block/by-name/vendor_boot
+/system		ext4	/dev/block/by-name/system
+/vendor		ext4	/dev/block/by-name/vendor
+/product	ext4	/dev/block/by-name/product
+/data		f2fs	/dev/block/by-name/userdata	flags=encryptable=metadata;resetoptions
